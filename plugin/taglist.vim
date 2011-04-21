@@ -1,6 +1,6 @@
 " File: taglist.vim
 " Author: Yegappan Lakshmanan (yegappan AT yahoo DOT com)
-" Contributions: Travis Jeffery <twitter.com/travisjeffer>
+" Contributions: Travis Jeffery <twitter.com/travisjeffery>
 " Version: 4.6
 " Last Modified: April 21, 2011
 " Copyright: Copyright (C) 2002-2007 Yegappan Lakshmanan
