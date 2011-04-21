@@ -1,4 +1,3 @@
 # TODO
 
-### Be able to use Go to Symbol without having opened or not currently having Tagslist opened
-
+- More settings; such as if Tagslist isn't open before/when calling GotoSymbol then it will be closed after calling
