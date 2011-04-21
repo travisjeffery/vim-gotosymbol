@@ -1,12 +1,20 @@
 # Go to Symbol for Vim
 
-Hey, ever used TextMate and discovered the great **Go to Symbol** feature, but
+## Sell
+
+Hey, ever used TextMate and discovered the great *Go to Symbol* feature, but
 was disheartened that it was one of the last features that hadn't been
 duplicated for Vim?
 
 Well now it's here.
 
-###
+## What
+
+For those that don't know what I'm talking about, the feature lists all
+symbols, functions, or variables, in the file, and pressing return will go to
+the position of the file of the symbol.
+
+### Install
 
 Install it like any other Vim plugin. Either drag the files to their respective
 directories in your Vim directory, or something like pathogen.
@@ -23,5 +31,12 @@ below, and it will complete to initialize and press enter to be taken to the
 symbol in your file.
 
 Also recommended is to add a mapping to call the function quickly, e.g. 
-this is in my .vimrc: `nmap <leader>T :GotoSymbol `, or if you want it exactly
-like TextMate and you use MacVim: `nmap <D-T> :GotoSymbol `.
+this is in my .vimrc: `nmap <leader>T :GotoSymbol `.
+
+Currently, Taglist has to be open to use the feature, so before calling
+`:GotoSymbol` make sure it's open by calling `:Tlist`.
+
+## Author
+
+Original author of Taglist by Yegappan Lakshmanan, and Go to Symbol feature
+added by Travis Jeffery.
