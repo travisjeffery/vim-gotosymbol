@@ -213,7 +213,7 @@ if !exists('loaded_taglist')
     if !exists('Tlist_Auto_Highlight_Tag')
         let Tlist_Auto_Highlight_Tag = 1
     endif
-    
+
     " Automatically highlight the current tag on entering a buffer
     if !exists('Tlist_Highlight_Tag_On_BufEnter')
         let Tlist_Highlight_Tag_On_BufEnter = 1
@@ -277,7 +277,7 @@ if !exists('loaded_taglist')
     command! -nargs=0 -bar TlistClose call s:Tlist_Window_Close()
     command! -nargs=0 -bar TlistUpdate call s:Tlist_Update_Current_File()
     command! -nargs=0 -bar TlistHighlightTag call s:Tlist_Window_Highlight_Tag(
-                        \ fnamemodify(bufname('%'), ':p'), line('.'), 2, 1)
+                \ fnamemodify(bufname('%'), ':p'), line('.'), 2, 1)
     " For backwards compatiblity define the TlistSync command
     command! -nargs=0 -bar TlistSync TlistHighlightTag
     command! -nargs=* -complete=buffer TlistShowPrototype
@@ -302,7 +302,7 @@ if !exists('loaded_taglist')
     " Trick to get the current script ID
     map <SID>xx <SID>xx
     let s:tlist_sid = substitute(maparg('<SID>xx'), '<SNR>\(\d\+_\)xx$',
-                                \ '\1', '')
+                \ '\1', '')
     unmap <SID>xx
 
     exe 'autocmd FuncUndefined *' . s:tlist_sid . 'Tlist_* source ' .
@@ -321,6 +321,45 @@ if !exists('loaded_taglist')
     if g:Tlist_Show_Menu && has('gui_running')
         call s:Tlist_Menu_Init()
     endif
+
+    function! s:completeSymbols(ArgLead, CmdLine, CursoPos)
+        let filename = fnamemodify(bufname('%'), ':p')
+        let ftype = s:Tlist_Get_Buffer_Filetype('%')
+        let retlist = []
+        let i = s:Tlist_Process_File(filename, ftype)
+        let j = 1
+        while j <= s:tlist_{i}_tag_count
+            call add(retlist, s:tlist_{i}_{j}_tag_name)
+            let j = j + 1
+        endwhile
+        return filter(retlist, 'v:val =~ "^' . a:ArgLead .'"')
+    endfunction
+
+    function! s:gotoSymbol(symbol)
+        let winnum = bufwinnr(g:TagList_title)
+        let gotoSymbolAndClose = 0
+        if winnum == -1
+            let gotoSymbolAndClose = 1
+            call s:Tlist_Window_Open()
+            "call s:Tlist_Window_Toggle()
+        endif
+        call s:Tlist_Window_Goto_Window()
+        let win_ctrl = "useopen"
+        let lnum = search(a:symbol)
+        if lnum == -1
+            let lnum = line('.')
+        else
+            .foldopen!
+        endif
+        let gotoSymbolAndClose = 0
+        let fidx = s:Tlist_Window_Get_File_Index_By_Linenum(lnum)
+        call s:Tlist_Window_Open_File(win_ctrl, s:tlist_{fidx}_filename, a:symbol)
+        if gotoSymbolAndClose == 1
+            call s:Tlist_Window_Close()
+        endif
+    endfunction
+
+    command! -bar -nargs=1 -complete=customlist,s:completeSymbols GotoSymbol :call s:gotoSymbol('<args>')
 
     " restore 'cpo'
     let &cpo = s:cpo_save
@@ -381,20 +420,20 @@ let s:tlist_def_beta_settings = 'beta;f:fragment;s:slot;v:pattern'
 
 " c language
 let s:tlist_def_c_settings = 'c;d:macro;g:enum;s:struct;u:union;t:typedef;' .
-                           \ 'v:variable;f:function'
+            \ 'v:variable;f:function'
 
 " c++ language
 let s:tlist_def_cpp_settings = 'c++;n:namespace;v:variable;d:macro;t:typedef;' .
-                             \ 'c:class;g:enum;s:struct;u:union;f:function'
+            \ 'c:class;g:enum;s:struct;u:union;f:function'
 
 " c# language
 let s:tlist_def_cs_settings = 'c#;d:macro;t:typedef;n:namespace;c:class;' .
-                             \ 'E:event;g:enum;s:struct;i:interface;' .
-                             \ 'p:properties;m:method'
+            \ 'E:event;g:enum;s:struct;i:interface;' .
+            \ 'p:properties;m:method'
 
 " cobol language
 let s:tlist_def_cobol_settings = 'cobol;d:data;f:file;g:group;p:paragraph;' .
-                               \ 'P:program;s:section'
+            \ 'P:program;s:section'
 
 " eiffel language
 let s:tlist_def_eiffel_settings = 'eiffel;c:class;f:feature'
@@ -407,15 +446,15 @@ let s:tlist_def_expect_settings = 'tcl;c:class;f:method;p:procedure'
 
 " fortran language
 let s:tlist_def_fortran_settings = 'fortran;p:program;b:block data;' .
-                    \ 'c:common;e:entry;i:interface;k:type;l:label;m:module;' .
-                    \ 'n:namelist;t:derived;v:variable;f:function;s:subroutine'
+            \ 'c:common;e:entry;i:interface;k:type;l:label;m:module;' .
+            \ 'n:namelist;t:derived;v:variable;f:function;s:subroutine'
 
 " HTML language
 let s:tlist_def_html_settings = 'html;a:anchor;f:javascript function'
 
 " java language
 let s:tlist_def_java_settings = 'java;p:package;c:class;i:interface;' .
-                              \ 'f:field;m:method'
+            \ 'f:field;m:method'
 
 " javascript language
 let s:tlist_def_javascript_settings = 'javascript;f:function'
@@ -446,7 +485,7 @@ let s:tlist_def_rexx_settings = 'rexx;s:subroutine'
 
 " ruby language
 let s:tlist_def_ruby_settings = 'ruby;c:class;f:method;F:function;' .
-                              \ 'm:singleton method'
+            \ 'm:singleton method'
 
 " scheme language
 let s:tlist_def_scheme_settings = 'scheme;s:set;f:function'
@@ -465,7 +504,7 @@ let s:tlist_def_slang_settings = 'slang;n:namespace;f:function'
 
 " sml language
 let s:tlist_def_sml_settings = 'sml;e:exception;c:functor;s:signature;' .
-                             \ 'r:structure;t:type;v:value;f:function'
+            \ 'r:structure;t:type;v:value;f:function'
 
 " sql language
 let s:tlist_def_sql_settings = 'sql;c:cursor;F:field;P:package;r:record;' .
@@ -476,9 +515,9 @@ let s:tlist_def_tcl_settings = 'tcl;c:class;f:method;m:method;p:procedure'
 
 " vera language
 let s:tlist_def_vera_settings = 'vera;c:class;d:macro;e:enumerator;' .
-                                \ 'f:function;g:enum;m:member;p:program;' .
-                                \ 'P:prototype;t:task;T:typedef;v:variable;' .
-                                \ 'x:externvar'
+            \ 'f:function;g:enum;m:member;p:program;' .
+            \ 'P:prototype;t:task;T:typedef;v:variable;' .
+            \ 'x:externvar'
 
 "verilog language
 let s:tlist_def_verilog_settings = 'verilog;m:module;c:constant;P:parameter;' .
@@ -943,7 +982,7 @@ function! s:Tlist_FileType_Init(ftype)
     endwhile
 
     let s:tlist_{a:ftype}_ctags_args = '--language-force=' . ctags_ftype .
-                            \ ' --' . ctags_ftype . '-types=' . ctags_flags
+                \ ' --' . ctags_ftype . '-types=' . ctags_flags
     let s:tlist_{a:ftype}_count = cnt
     let s:tlist_{a:ftype}_ctags_flags = ctags_flags
 
@@ -1415,22 +1454,22 @@ function! s:Tlist_Window_Exit_Only_Window()
     " Before quitting Vim, delete the taglist buffer so that
     " the '0 mark is correctly set to the previous buffer.
     if v:version < 700
-	if winbufnr(2) == -1
-	    bdelete
-	    quit
-	endif
+        if winbufnr(2) == -1
+            bdelete
+            quit
+        endif
     else
-	if winbufnr(2) == -1
-	    if tabpagenr('$') == 1
-		" Only one tag page is present
-		bdelete
-		quit
-	    else
-		" More than one tab page is present. Close only the current
-		" tab page
-		close
-	    endif
-	endif
+        if winbufnr(2) == -1
+            if tabpagenr('$') == 1
+                " Only one tag page is present
+                bdelete
+                quit
+            else
+                " More than one tab page is present. Close only the current
+                " tab page
+                close
+            endif
+        endif
     endif
 endfunction
 
@@ -1558,10 +1597,10 @@ function! s:Tlist_Window_Init()
     nnoremap <buffer> <silent> P
                 \ :call <SID>Tlist_Window_Jump_To_Tag('prevwin')<CR>
     if v:version >= 700
-    nnoremap <buffer> <silent> t
-                \ :call <SID>Tlist_Window_Jump_To_Tag('checktab')<CR>
-    nnoremap <buffer> <silent> <C-t>
-                \ :call <SID>Tlist_Window_Jump_To_Tag('newtab')<CR>
+        nnoremap <buffer> <silent> t
+                    \ :call <SID>Tlist_Window_Jump_To_Tag('checktab')<CR>
+        nnoremap <buffer> <silent> <C-t>
+                    \ :call <SID>Tlist_Window_Jump_To_Tag('newtab')<CR>
     endif
     nnoremap <buffer> <silent> <2-LeftMouse>
                 \ :call <SID>Tlist_Window_Jump_To_Tag('useopen')<CR>
@@ -1598,10 +1637,10 @@ function! s:Tlist_Window_Init()
     inoremap <buffer> <silent> P
                 \ <C-o>:call <SID>Tlist_Window_Jump_To_Tag('prevwin')<CR>
     if v:version >= 700
-    inoremap <buffer> <silent> t
-                \ <C-o>:call <SID>Tlist_Window_Jump_To_Tag('checktab')<CR>
-    inoremap <buffer> <silent> <C-t>
-                \ <C-o>:call <SID>Tlist_Window_Jump_To_Tag('newtab')<CR>
+        inoremap <buffer> <silent> t
+                    \ <C-o>:call <SID>Tlist_Window_Jump_To_Tag('checktab')<CR>
+        inoremap <buffer> <silent> <C-t>
+                    \ <C-o>:call <SID>Tlist_Window_Jump_To_Tag('newtab')<CR>
     endif
     inoremap <buffer> <silent> <2-LeftMouse>
                 \ <C-o>:call <SID>Tlist_Window_Jump_To_Tag('useopen')<CR>
@@ -1615,9 +1654,9 @@ function! s:Tlist_Window_Init()
     inoremap <buffer> <silent> <kMinus>      <C-o>:silent! foldclose<CR>
     inoremap <buffer> <silent> <kMultiply>   <C-o>:silent! %foldopen!<CR>
     inoremap <buffer> <silent> <Space>       <C-o>:call
-                                    \ <SID>Tlist_Window_Show_Info()<CR>
+                \ <SID>Tlist_Window_Show_Info()<CR>
     inoremap <buffer> <silent> u
-                            \ <C-o>:call <SID>Tlist_Window_Update_File()<CR>
+                \ <C-o>:call <SID>Tlist_Window_Update_File()<CR>
     inoremap <buffer> <silent> d    <C-o>:call <SID>Tlist_Remove_File(-1, 1)<CR>
     inoremap <buffer> <silent> x    <C-o>:call <SID>Tlist_Window_Zoom()<CR>
     inoremap <buffer> <silent> [[   <C-o>:call <SID>Tlist_Window_Move_To_File(-1)<CR>
@@ -1658,19 +1697,19 @@ function! s:Tlist_Window_Init()
         autocmd CursorHold __Tag_List__ call s:Tlist_Window_Show_Info()
         " Highlight the current tag periodically
         autocmd CursorHold * silent call s:Tlist_Window_Highlight_Tag(
-                            \ fnamemodify(bufname('%'), ':p'), line('.'), 1, 0)
+                    \ fnamemodify(bufname('%'), ':p'), line('.'), 1, 0)
 
         " Adjust the Vim window width when taglist window is closed
         autocmd BufUnload __Tag_List__ call s:Tlist_Post_Close_Cleanup()
         " Close the fold for this buffer when leaving the buffer
         if g:Tlist_File_Fold_Auto_Close
             autocmd BufEnter * silent
-                \ call s:Tlist_Window_Open_File_Fold(expand('<abuf>'))
+                        \ call s:Tlist_Window_Open_File_Fold(expand('<abuf>'))
         endif
         " Exit Vim itself if only the taglist window is present (optional)
         if g:Tlist_Exit_OnlyWindow
-	    autocmd BufEnter __Tag_List__ nested
-			\ call s:Tlist_Window_Exit_Only_Window()
+            autocmd BufEnter __Tag_List__ nested
+                        \ call s:Tlist_Window_Exit_Only_Window()
         endif
         if s:tlist_app_name != "winmanager" &&
                     \ !g:Tlist_Process_File_Always &&
@@ -1801,24 +1840,24 @@ function! s:Tlist_Post_Close_Cleanup()
     endif
 
     if s:tlist_app_name != "winmanager"
-    if g:Tlist_Use_Horiz_Window || g:Tlist_Inc_Winwidth == 0 ||
-                \ s:tlist_winsize_chgd != 1 ||
-                \ &columns < (80 + g:Tlist_WinWidth)
-        " No need to adjust window width if using horizontally split taglist
-        " window or if columns is less than 101 or if the user chose not to
-        " adjust the window width
-    else
-        " If the user didn't manually move the window, then restore the window
-        " position to the pre-taglist position
-        if s:tlist_pre_winx != -1 && s:tlist_pre_winy != -1 &&
-                    \ getwinposx() == s:tlist_winx &&
-                    \ getwinposy() == s:tlist_winy
-            exe 'winpos ' . s:tlist_pre_winx . ' ' . s:tlist_pre_winy
-        endif
+        if g:Tlist_Use_Horiz_Window || g:Tlist_Inc_Winwidth == 0 ||
+                    \ s:tlist_winsize_chgd != 1 ||
+                    \ &columns < (80 + g:Tlist_WinWidth)
+            " No need to adjust window width if using horizontally split taglist
+            " window or if columns is less than 101 or if the user chose not to
+            " adjust the window width
+        else
+            " If the user didn't manually move the window, then restore the window
+            " position to the pre-taglist position
+            if s:tlist_pre_winx != -1 && s:tlist_pre_winy != -1 &&
+                        \ getwinposx() == s:tlist_winx &&
+                        \ getwinposy() == s:tlist_winy
+                exe 'winpos ' . s:tlist_pre_winx . ' ' . s:tlist_pre_winy
+            endif
 
-        " Adjust the Vim window width
-        let &columns= &columns - (g:Tlist_WinWidth + 1)
-    endif
+            " Adjust the Vim window width
+            let &columns= &columns - (g:Tlist_WinWidth + 1)
+        endif
     endif
 
     let s:tlist_winsize_chgd = -1
@@ -2105,7 +2144,7 @@ function! s:Tlist_Get_Tag_SearchPat(fidx, tidx)
         let end = end -1
     endif
     let {tpat_var} = '\V\^' . strpart(tag_line, start, end - start) .
-                        \ (tag_line[end] == '$' ? '\$' : '')
+                \ (tag_line[end] == '$' ? '\$' : '')
 
     return {tpat_var}
 endfunction
@@ -2935,7 +2974,7 @@ endfunction
 " action == 'set', set the sort order to sort_type
 function! s:Tlist_Change_Sort(caller, action, sort_type)
     call s:Tlist_Log_Msg('Tlist_Change_Sort (caller = ' . a:caller .
-            \ ', action = ' . a:action . ', sort_type = ' . a:sort_type . ')')
+                \ ', action = ' . a:action . ', sort_type = ' . a:sort_type . ')')
     if a:caller == 'cmd'
         let fidx = s:Tlist_Window_Get_File_Index_By_Linenum(line('.'))
         if fidx == -1
@@ -3112,155 +3151,155 @@ function! s:Tlist_Window_Open_File(win_ctrl, filename, tagpat)
         call WinManagerFileEdit(a:filename, a:win_ctrl == 'newwin')
     else
 
-    if a:win_ctrl == 'newtab'
-        " Create a new tab
-        exe 'tabnew ' . escape(a:filename, ' ')
-        " Open the taglist window in the new tab
-        call s:Tlist_Window_Open()
-    endif
-
-    if a:win_ctrl == 'checktab'
-        " Check whether the file is present in any of the tabs.
-        " If the file is present in the current tab, then use the
-        " current tab.
-        if bufwinnr(a:filename) != -1
-            let file_present_in_tab = 1
-            let i = tabpagenr()
-        else
-            let i = 1
-            let bnum = bufnr(a:filename)
-            let file_present_in_tab = 0
-            while i <= tabpagenr('$')
-                if index(tabpagebuflist(i), bnum) != -1
-                    let file_present_in_tab = 1
-                    break
-                endif
-                let i += 1
-            endwhile
-        endif
-
-        if file_present_in_tab
-            " Goto the tab containing the file
-            exe 'tabnext ' . i
-        else
-            " Open a new tab
+        if a:win_ctrl == 'newtab'
+            " Create a new tab
             exe 'tabnew ' . escape(a:filename, ' ')
-
-            " Open the taglist window
+            " Open the taglist window in the new tab
             call s:Tlist_Window_Open()
         endif
-    endif
 
-    let winnum = -1
-    if a:win_ctrl == 'prevwin'
-        " Open the file in the previous window, if it is usable
-        let cur_win = winnr()
-        wincmd p
-        if &buftype == '' && !&previewwindow
-            exe "edit " . escape(a:filename, ' ')
-            let winnum = winnr()
-        else
-            " Previous window is not usable
-            exe cur_win . 'wincmd w'
+        if a:win_ctrl == 'checktab'
+            " Check whether the file is present in any of the tabs.
+            " If the file is present in the current tab, then use the
+            " current tab.
+            if bufwinnr(a:filename) != -1
+                let file_present_in_tab = 1
+                let i = tabpagenr()
+            else
+                let i = 1
+                let bnum = bufnr(a:filename)
+                let file_present_in_tab = 0
+                while i <= tabpagenr('$')
+                    if index(tabpagebuflist(i), bnum) != -1
+                        let file_present_in_tab = 1
+                        break
+                    endif
+                    let i += 1
+                endwhile
+            endif
+
+            if file_present_in_tab
+                " Goto the tab containing the file
+                exe 'tabnext ' . i
+            else
+                " Open a new tab
+                exe 'tabnew ' . escape(a:filename, ' ')
+
+                " Open the taglist window
+                call s:Tlist_Window_Open()
+            endif
         endif
-    endif
 
-    " Goto the window containing the file.  If the window is not there, open a
-    " new window
-    if winnum == -1
-        let winnum = bufwinnr(a:filename)
-    endif
-
-    if winnum == -1
-        " Locate the previously used window for opening a file
-        let fwin_num = 0
-        let first_usable_win = 0
-
-        let i = 1
-        let bnum = winbufnr(i)
-        while bnum != -1
-            if getwinvar(i, 'tlist_file_window') == 'yes'
-                let fwin_num = i
-                break
+        let winnum = -1
+        if a:win_ctrl == 'prevwin'
+            " Open the file in the previous window, if it is usable
+            let cur_win = winnr()
+            wincmd p
+            if &buftype == '' && !&previewwindow
+                exe "edit " . escape(a:filename, ' ')
+                let winnum = winnr()
+            else
+                " Previous window is not usable
+                exe cur_win . 'wincmd w'
             endif
-            if first_usable_win == 0 &&
-                        \ getbufvar(bnum, '&buftype') == '' &&
-                        \ !getwinvar(i, '&previewwindow')
-                " First non-taglist, non-plugin and non-preview window
-                let first_usable_win = i
-            endif
-            let i = i + 1
+        endif
+
+        " Goto the window containing the file.  If the window is not there, open a
+        " new window
+        if winnum == -1
+            let winnum = bufwinnr(a:filename)
+        endif
+
+        if winnum == -1
+            " Locate the previously used window for opening a file
+            let fwin_num = 0
+            let first_usable_win = 0
+
+            let i = 1
             let bnum = winbufnr(i)
-        endwhile
+            while bnum != -1
+                if getwinvar(i, 'tlist_file_window') == 'yes'
+                    let fwin_num = i
+                    break
+                endif
+                if first_usable_win == 0 &&
+                            \ getbufvar(bnum, '&buftype') == '' &&
+                            \ !getwinvar(i, '&previewwindow')
+                    " First non-taglist, non-plugin and non-preview window
+                    let first_usable_win = i
+                endif
+                let i = i + 1
+                let bnum = winbufnr(i)
+            endwhile
 
-        " If a previously used window is not found, then use the first
-        " non-taglist window
-        if fwin_num == 0
-            let fwin_num = first_usable_win
-        endif
+            " If a previously used window is not found, then use the first
+            " non-taglist window
+            if fwin_num == 0
+                let fwin_num = first_usable_win
+            endif
 
-        if fwin_num != 0
-            " Jump to the file window
-            exe fwin_num . "wincmd w"
+            if fwin_num != 0
+                " Jump to the file window
+                exe fwin_num . "wincmd w"
 
-            " If the user asked to jump to the tag in a new window, then split
-            " the existing window into two.
+                " If the user asked to jump to the tag in a new window, then split
+                " the existing window into two.
+                if a:win_ctrl == 'newwin'
+                    split
+                endif
+                exe "edit " . escape(a:filename, ' ')
+            else
+                " Open a new window
+                if g:Tlist_Use_Horiz_Window
+                    exe 'leftabove split ' . escape(a:filename, ' ')
+                else
+                    if winbufnr(2) == -1
+                        " Only the taglist window is present
+                        if g:Tlist_Use_Right_Window
+                            exe 'leftabove vertical split ' .
+                                        \ escape(a:filename, ' ')
+                        else
+                            exe 'rightbelow vertical split ' .
+                                        \ escape(a:filename, ' ')
+                        endif
+
+                        " Go to the taglist window to change the window size to
+                        " the user configured value
+                        call s:Tlist_Exe_Cmd_No_Acmds('wincmd p')
+                        if g:Tlist_Use_Horiz_Window
+                            exe 'resize ' . g:Tlist_WinHeight
+                        else
+                            exe 'vertical resize ' . g:Tlist_WinWidth
+                        endif
+                        " Go back to the file window
+                        call s:Tlist_Exe_Cmd_No_Acmds('wincmd p')
+                    else
+                        " A plugin or help window is also present
+                        wincmd w
+                        exe 'leftabove split ' . escape(a:filename, ' ')
+                    endif
+                endif
+            endif
+            " Mark the window, so that it can be reused.
+            call s:Tlist_Window_Mark_File_Window()
+        else
+            if v:version >= 700
+                " If the file is opened in more than one window, then check
+                " whether the last accessed window has the selected file.
+                " If it does, then use that window.
+                let lastwin_bufnum = winbufnr(winnr('#'))
+                if bufnr(a:filename) == lastwin_bufnum
+                    let winnum = winnr('#')
+                endif
+            endif
+            exe winnum . 'wincmd w'
+
+            " If the user asked to jump to the tag in a new window, then split the
+            " existing window into two.
             if a:win_ctrl == 'newwin'
                 split
             endif
-            exe "edit " . escape(a:filename, ' ')
-        else
-            " Open a new window
-            if g:Tlist_Use_Horiz_Window
-                exe 'leftabove split ' . escape(a:filename, ' ')
-            else
-                if winbufnr(2) == -1
-                    " Only the taglist window is present
-                    if g:Tlist_Use_Right_Window
-                        exe 'leftabove vertical split ' .
-                                    \ escape(a:filename, ' ')
-                    else
-                        exe 'rightbelow vertical split ' .
-                                    \ escape(a:filename, ' ')
-                    endif
-
-                    " Go to the taglist window to change the window size to
-                    " the user configured value
-                    call s:Tlist_Exe_Cmd_No_Acmds('wincmd p')
-                    if g:Tlist_Use_Horiz_Window
-                        exe 'resize ' . g:Tlist_WinHeight
-                    else
-                        exe 'vertical resize ' . g:Tlist_WinWidth
-                    endif
-                    " Go back to the file window
-                    call s:Tlist_Exe_Cmd_No_Acmds('wincmd p')
-                else
-                    " A plugin or help window is also present
-                    wincmd w
-                    exe 'leftabove split ' . escape(a:filename, ' ')
-                endif
-            endif
         endif
-        " Mark the window, so that it can be reused.
-        call s:Tlist_Window_Mark_File_Window()
-    else
-        if v:version >= 700
-            " If the file is opened in more than one window, then check
-            " whether the last accessed window has the selected file.
-            " If it does, then use that window.
-            let lastwin_bufnum = winbufnr(winnr('#'))
-            if bufnr(a:filename) == lastwin_bufnum
-                let winnum = winnr('#')
-            endif
-        endif
-        exe winnum . 'wincmd w'
-
-        " If the user asked to jump to the tag in a new window, then split the
-        " existing window into two.
-        if a:win_ctrl == 'newwin'
-            split
-        endif
-    endif
     endif
 
     " Jump to the tag
@@ -3634,7 +3673,7 @@ function! Tlist_Get_Tag_Prototype_By_Line(...)
     else
         " Sufficient arguments are not supplied
         let msg =  'Usage: Tlist_Get_Tag_Prototype_By_Line <filename> ' .
-                                \ '<line_number>'
+                    \ '<line_number>'
         call s:Tlist_Warning_Msg(msg)
         return ""
     endif
@@ -3941,13 +3980,13 @@ function! s:Tlist_Session_Save(...)
     while i < s:tlist_file_count
         " Store information about the file
         silent! echo 'let tlist_' . i . "_filename = '" .
-                                            \ s:tlist_{i}_filename . "'"
+                    \ s:tlist_{i}_filename . "'"
         silent! echo 'let tlist_' . i . '_sort_type = "' .
-                                                \ s:tlist_{i}_sort_type . '"'
+                    \ s:tlist_{i}_sort_type . '"'
         silent! echo 'let tlist_' . i . '_filetype = "' .
-                                            \ s:tlist_{i}_filetype . '"'
+                    \ s:tlist_{i}_filetype . '"'
         silent! echo 'let tlist_' . i . '_tag_count = ' .
-                                                        \ s:tlist_{i}_tag_count
+                    \ s:tlist_{i}_tag_count
         " Store information about all the tags
         let j = 1
         while j <= s:tlist_{i}_tag_count
@@ -3969,9 +4008,9 @@ function! s:Tlist_Session_Save(...)
                 let txt = escape(s:tlist_{i}_{ttype}, '"\')
                 let txt = substitute(txt, "\n", "\\\\n", 'g')
                 silent! echo 'let tlist_' . i . '_' . ttype . ' = "' .
-                                                \ txt . '"'
+                            \ txt . '"'
                 silent! echo 'let tlist_' . i . '_' . ttype . '_count = ' .
-                                                     \ s:tlist_{i}_{ttype}_count
+                            \ s:tlist_{i}_{ttype}_count
                 let k = 1
                 while k <= s:tlist_{i}_{ttype}_count
                     silent! echo 'let tlist_' . i . '_' . ttype . '_' . k .
@@ -4141,18 +4180,18 @@ function! s:Tlist_Menu_Add_Base_Menu()
     " Add the menu
     anoremenu <silent> T&ags.Refresh\ menu :call <SID>Tlist_Menu_Refresh()<CR>
     anoremenu <silent> T&ags.Sort\ menu\ by.Name
-                    \ :call <SID>Tlist_Change_Sort('menu', 'set', 'name')<CR>
+                \ :call <SID>Tlist_Change_Sort('menu', 'set', 'name')<CR>
     anoremenu <silent> T&ags.Sort\ menu\ by.Order
-                    \ :call <SID>Tlist_Change_Sort('menu', 'set', 'order')<CR>
+                \ :call <SID>Tlist_Change_Sort('menu', 'set', 'order')<CR>
     anoremenu T&ags.-SEP1-           :
 
     if &mousemodel =~ 'popup'
         anoremenu <silent> PopUp.T&ags.Refresh\ menu
                     \ :call <SID>Tlist_Menu_Refresh()<CR>
         anoremenu <silent> PopUp.T&ags.Sort\ menu\ by.Name
-                  \ :call <SID>Tlist_Change_Sort('menu', 'set', 'name')<CR>
+                    \ :call <SID>Tlist_Change_Sort('menu', 'set', 'name')<CR>
         anoremenu <silent> PopUp.T&ags.Sort\ menu\ by.Order
-                  \ :call <SID>Tlist_Change_Sort('menu', 'set', 'order')<CR>
+                    \ :call <SID>Tlist_Change_Sort('menu', 'set', 'order')<CR>
         anoremenu PopUp.T&ags.-SEP1-           :
     endif
 endfunction
@@ -4275,7 +4314,7 @@ function! s:Tlist_Menu_File_Refresh(fidx)
     " Update the popup menu (if enabled)
     if &mousemodel =~ 'popup'
         let cmd = substitute(s:tlist_{a:fidx}_menu_cmd, ' T\\&ags\.',
-                                        \ ' PopUp.T\\\&ags.', "g")
+                    \ ' PopUp.T\\\&ags.', "g")
         exe cmd
     endif
 
@@ -4541,33 +4580,6 @@ function! TagList_WrapUp()
     return 0
 endfunction
 
-function! s:completeSymbols(ArgLead, CmdLine, CursoPos)
-    let filename = fnamemodify(bufname('%'), ':p')
-    let ftype = s:Tlist_Get_Buffer_Filetype('%')
-    let retlist = []
-    let i = s:Tlist_Process_File(filename, ftype)
-    let j = 1
-    while j <= s:tlist_{i}_tag_count
-        call add(retlist, s:tlist_{i}_{j}_tag_name)
-        let j = j + 1
-    endwhile
-    return filter(retlist, 'v:val =~ "^' . a:ArgLead .'"')
-endfunction
-
-function! s:gotoSymbol(symbol)
-    call s:Tlist_Window_Goto_Window()
-    let win_ctrl = "useopen"
-    let lnum = search(a:symbol)
-    if lnum == -1
-        let lnum = line('.')
-    else
-        .foldopen!
-    endif
-    let fidx = s:Tlist_Window_Get_File_Index_By_Linenum(lnum)
-    call s:Tlist_Window_Open_File(win_ctrl, s:tlist_{fidx}_filename, a:symbol)
-endfunction
-
-command! -nargs=1 -complete=customlist,s:completeSymbols GotoSymbol :call s:gotoSymbol('<args>')
 
 " restore 'cpo'
 let &cpo = s:cpo_save
