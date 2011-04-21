@@ -14,13 +14,12 @@ For those that don't know what I'm talking about, the feature lists all
 symbols, functions, or variables, in the file, and pressing return will go to
 the position of the file of the symbol.
 
-### Install
+## Install
 
 Install it like any other Vim plugin. Either drag the files to their respective
 directories in your Vim directory, or something like pathogen.
 
-
-### Using
+## Using
 
 Then to use just use your mapping or call the function and type in the
 beginning of your symbol and press Tab to complete the symbol if there is only
