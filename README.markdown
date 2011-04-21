@@ -32,9 +32,6 @@ symbol in your file.
 Also recommended is to add a mapping to call the function quickly, e.g. 
 this is in my .vimrc: `nmap <leader>T :GotoSymbol `.
 
-Currently, Taglist has to be open to use the feature, so before calling
-`:GotoSymbol` make sure it's open by calling `:Tlist`.
-
 ## Author
 
 Original author of Taglist by Yegappan Lakshmanan, and Go to Symbol feature
